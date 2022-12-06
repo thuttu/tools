@@ -7,7 +7,7 @@ create sets, packages and images for the OPNsense project.
 Setting up a build system
 =========================
 
-Install [FreeBSD](https://www.freebsd.org/) 13.0-RELEASE for amd64
+Install [FreeBSD](https://www.freebsd.org/) 13.1-RELEASE for amd64
 on a machine with at least 25GB of hard disk (UFS works better than ZFS)
 and at least 4GB of RAM to successfully build all standard images.
 All tasks require a root user.  Do the following to grab the repositories
@@ -17,6 +17,33 @@ All tasks require a root user.  Do the following to grab the repositories
     # cd /usr
     # git clone https://github.com/opnsense/tools
     # cd tools
+
+*pkg* Shenanigans
+-----------------
+
+Upstream keeps making incompatible changes to ``pkg`` which causes build
+failures.  In order to work around this problem you must use the OPNsense
+version of pkg, not the FreeBSD version of pkg.  This will require some
+non-standard setup to accomplish.
+
+This is necessary because OPNsense builds within a jail and most but not
+all operations happen with the jails version of `pkg`. There are some aspects
+of the build process that operate outside the jail and those steps require
+interoperability between the base pkg and the jail pkg.  To enable this
+compatibility you will need to use the OPNsense package repositories instead
+of the FreeBSD ones.  The fix for this is a make target, so you can simply
+issue the following to fix the pkg version.  **WARNING:  This step will
+uninstall all existing packages and destroy the package database directory.
+If this machine is used for any other purposes other than building OPNsense
+this will likely break your machine.**
+
+    # make fix
+
+Resuming Setup
+--------------
+
+Now we can resume the build with the proper `pkg` having been installed:
+
     # make update
 
 Note that the OPNsense repositories can also be setup in a non-/usr directory
